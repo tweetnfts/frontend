@@ -1,32 +1,11 @@
 import logo from "./logo.svg";
 import { wagmiContract } from "./contract";
 import "./App.css";
-import "@rainbow-me/rainbowkit/styles.css";
-
-import { useRef } from "react";
-
-import { toPng } from "html-to-image";
-
 import { Buffer } from "buffer";
-
 import { create } from "ipfs-http-client";
-
 import { needle } from "needle";
-
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
-import { infuraProvider } from "wagmi/providers/infura";
-import { publicProvider } from "wagmi/providers/public";
 import { privateKeyToAccount } from "viem/accounts";
-
-import { connect } from "@wagmi/core";
-import { InjectedConnector } from "@wagmi/core/connectors/injected";
-
-import { createHash } from "crypto";
-
 import React, { useEffect, useState } from "react";
-// import ReactDOM from "react-dom/client";
 import ReactDOM from "react-dom";
 import {
 	Address,
@@ -87,7 +66,6 @@ const Tweet = ({ data }) => {
 };
 
 function App() {
-	const tweetRef = useRef();
 
 	const [account, setAccount] = useState<Address>();
 	const [hash, setHash] = useState<Hash>();
