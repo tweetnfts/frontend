@@ -66,7 +66,6 @@ const Tweet = ({ data }) => {
 };
 
 function App() {
-
 	const [account, setAccount] = useState<Address>();
 	const [hash, setHash] = useState<Hash>();
 	const [receipt, setReceipt] = useState<TransactionReceipt>();
@@ -122,7 +121,10 @@ function App() {
 			}
 		).then((response) => response.json());
 
-		console.log(`{ "description": "Universal Tweet Object", "image": "${twitterImage.url}", "name": ${tweetID}, "attributes": [
+
+		console.log(response.data.text);
+
+		console.log(`{ "description": "${response.data.text.replace(/(^[ \t]*\n)/gm, "")}", "external_url": "https://twitter.com/${response.includes.users[0].username}/status/${tweetID}", "image": "${twitterImage.url}", "name": ${tweetID}, "attributes": [
     {
       "trait_type": "Likes", 
       "value": ${response.data.public_metrics.like_count}
@@ -154,31 +156,47 @@ function App() {
     }
   ]}`);
 
-		const result =
-			await client.add(`{ "description": "Universal Tweet Object", "image": "${twitterImage.url}", "name": ${tweetID}, "attributes": [
+		const result = await client.add(`{ "description": "${
+			response.data.text.replace(/\n\n/g, ' ')
+		}", "external_url": "https://twitter.com/${
+			response.includes.users[0].username
+		}/status/${tweetID}", "image": "${
+			twitterImage.url
+		}", "name": ${tweetID}, "attributes": [
+    {
+      "trait_type": "Author", 
+      "value": "${response.includes.users[0].name} (@${
+			response.includes.users[0].username
+		})"
+    },
+		{
+			"display_type": "date",
+      "trait_type": "Creation Date",
+			"value": ${Math.floor(new Date(response.data.created_at).getTime() / 1000)}
+		},
     {
       "trait_type": "Likes", 
-      "value": "${response.data.public_metrics.like_count}"
+      "value": ${response.data.public_metrics.like_count}
     },
     {
       "trait_type": "Bookmarks", 
-      "value": "${response.data.public_metrics.bookmark_count}"
+      "value": ${response.data.public_metrics.bookmark_count}
     },
     {
       "trait_type": "Impressions", 
-      "value": "${response.data.public_metrics.impression_count}"
+      "value": ${response.data.public_metrics.impression_count}
     },
     {
       "trait_type": "Quote Retweets", 
-      "value": "${response.data.public_metrics.quote_count}"
+      "value": ${response.data.public_metrics.quote_count}
     },
     {
       "trait_type": "Retweets", 
-      "value": "${response.data.public_metrics.retweet_count}"
+      "value": ${response.data.public_metrics.retweet_count}
     },
     {
       "trait_type": "Comments", 
-      "value": "${response.data.public_metrics.reply_count}"
+      "value": ${response.data.public_metrics.reply_count}
     }
   ]}`);
 		console.log(result);
