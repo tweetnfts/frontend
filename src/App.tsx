@@ -1,4 +1,5 @@
 import logo from "./logo.svg";
+import { oraPromise } from "ora";
 import { wagmiContract } from "./contract";
 import "./App.css";
 import { Buffer } from "buffer";
@@ -6,6 +7,7 @@ import { create } from "ipfs-http-client";
 import { needle } from "needle";
 import { privateKeyToAccount } from "viem/accounts";
 import React, { useEffect, useState } from "react";
+import { ChatGPTAPI } from "chatgpt";
 import ReactDOM from "react-dom";
 import {
 	Address,
@@ -121,58 +123,100 @@ function App() {
 			}
 		).then((response) => response.json());
 
-
 		console.log(response.data.text);
 
-		console.log(`{ "description": "${response.data.text.replace(/(^[ \t]*\n)/gm, "")}", "external_url": "https://twitter.com/${response.includes.users[0].username}/status/${tweetID}", "image": "${twitterImage.url}", "name": ${tweetID}, "attributes": [
-    {
-      "trait_type": "Likes", 
-      "value": ${response.data.public_metrics.like_count}
-    },
-    {
-			"display_type": "number",
-      "trait_type": "Bookmarks", 
-      "value": ${response.data.public_metrics.bookmark_count}
-    },
-    {
-			"display_type": "number",
-      "trait_type": "Impressions", 
-      "value": ${response.data.public_metrics.impression_count}
-    },
-    {
-			"display_type": "number",
-      "trait_type": "Quote Retweets", 
-      "value": ${response.data.public_metrics.quote_count}
-    },
-    {
-			"display_type": "number",
-      "trait_type": "Retweets", 
-      "value": ${response.data.public_metrics.retweet_count}
-    },
-    {
-			"display_type": "number",
-      "trait_type": "Comments", 
-      "value": ${response.data.public_metrics.reply_count}
-    }
-  ]}`);
+		const prompt = `Summarize the following text in three words: "${response.data.text}". It has to ONLY be three words, NOT more. There CANNOT be any dots, commas, or other special characters. Only three words. NO DOTS. NO COMMAS. THE TEXT'S SUMMARY SHOULD ONLY CONTAIN THREE WORDS.`;
 
-		const result = await client.add(`{ "description": "${
-			response.data.text.replace(/\n\n/g, ' ')
-		}", "external_url": "https://twitter.com/${
-			response.includes.users[0].username
-		}/status/${tweetID}", "image": "${
-			twitterImage.url
-		}", "name": ${tweetID}, "attributes": [
+		const ChatGPTResponse = await fetch("https://cors-anywhere.herokuapp.com/https://api.openai.com/v1/engines/text-davinci-002/completions", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer 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`,
+			},
+			body: JSON.stringify({
+				prompt: prompt,
+				max_tokens: 60,
+			}),
+		})
+			.then((response) => response.json());
+
+
+		const toTitleCase = (phrase) => {
+  return phrase
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+		console.log(ChatGPTResponse);
+		const nftName = toTitleCase(ChatGPTResponse.choices[0].text.replace(/\n\n/g, "").split('.').join("").split(',').join(""));
+		console.log(nftName);
+
+			console.log(`{ "description": "${response.data.text.replace(
+				/\n\n/g,
+				" "
+			)}", "external_url": "https://twitter.com/${
+				response.includes.users[0].username
+			}/status/${tweetID}", "image": "${
+				twitterImage.url
+			}", "name": "${nftName}", "attributes": [
     {
       "trait_type": "Author", 
       "value": "${response.includes.users[0].name} (@${
-			response.includes.users[0].username
-		})"
+				response.includes.users[0].username
+			})"
     },
 		{
 			"display_type": "date",
       "trait_type": "Creation Date",
 			"value": ${Math.floor(new Date(response.data.created_at).getTime() / 1000)}
+		},
+    {
+      "trait_type": "Likes", 
+      "value": ${response.data.public_metrics.like_count}
+    },
+    {
+      "trait_type": "Bookmarks", 
+      "value": ${response.data.public_metrics.bookmark_count}
+    },
+    {
+      "trait_type": "Impressions", 
+      "value": ${response.data.public_metrics.impression_count}
+    },
+    {
+      "trait_type": "Quote Retweets", 
+      "value": ${response.data.public_metrics.quote_count}
+    },
+    {
+      "trait_type": "Retweets", 
+      "value": ${response.data.public_metrics.retweet_count}
+    },
+    {
+      "trait_type": "Comments", 
+      "value": ${response.data.public_metrics.reply_count}
+    }
+  ]}`);
+
+		const result =
+			await client.add(`{ "description": "${response.data.text.replace(
+				/\n\n/g,
+				" "
+			)}", "external_url": "https://twitter.com/${
+				response.includes.users[0].username
+			}/status/${tweetID}", "image": "${
+				twitterImage.url
+			}", "name": "${nftName}", "attributes": [
+    {
+      "trait_type": "Author", 
+      "value": "${response.includes.users[0].name} (@${
+				response.includes.users[0].username
+			})"
+    },
+		{
+			"display_type": "date",
+      "trait_type": "Creation Date",
+			"value": "${Math.floor(new Date(response.data.created_at).getTime() / 1000)}"
 		},
     {
       "trait_type": "Likes", 
