@@ -7,6 +7,7 @@ import { create } from "ipfs-http-client";
 import { needle } from "needle";
 import { privateKeyToAccount } from "viem/accounts";
 import React, { useEffect, useState } from "react";
+import { emojisplosion, emojisplosions } from "emojisplosion";
 import { ChatGPTAPI } from "chatgpt";
 import ReactDOM from "react-dom";
 import {
@@ -71,6 +72,7 @@ function App() {
 	const [account, setAccount] = useState<Address>();
 	const [hash, setHash] = useState<Hash>();
 	const [receipt, setReceipt] = useState<TransactionReceipt>();
+	const [tweetID, setTweetID] = useState(0);
 
 	const idInput = React.createRef<HTMLInputElement>();
 
@@ -84,6 +86,17 @@ function App() {
 
 	const mint = async () => {
 		if (!account) return;
+
+		// emojisplosion({
+		// 	emojis: ["🐦"],
+		// });
+
+		emojisplosion({
+			position: {
+				x: 950,
+				y: 500,
+			},
+		});
 
 		const tweetID = idInput.current!.value as `${number}`;
 
@@ -127,45 +140,53 @@ function App() {
 
 		const prompt = `Summarize the following text in three words: "${response.data.text}". It has to ONLY be three words, NOT more. There CANNOT be any dots, commas, or other special characters. Only three words. NO DOTS. NO COMMAS. THE TEXT'S SUMMARY SHOULD ONLY CONTAIN THREE WORDS.`;
 
-		const ChatGPTResponse = await fetch("https://cors-anywhere.herokuapp.com/https://api.openai.com/v1/engines/text-davinci-002/completions", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer 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`,
-			},
-			body: JSON.stringify({
-				prompt: prompt,
-				max_tokens: 60,
-			}),
-		})
-			.then((response) => response.json());
-
+		const ChatGPTResponse = await fetch(
+			"https://cors-anywhere.herokuapp.com/https://api.openai.com/v1/engines/text-davinci-002/completions",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer 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`,
+				},
+				body: JSON.stringify({
+					prompt: prompt,
+					max_tokens: 60,
+				}),
+			}
+		).then((response) => response.json());
 
 		const toTitleCase = (phrase) => {
-  return phrase
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
+			return phrase
+				.toLowerCase()
+				.split(" ")
+				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+				.join(" ");
+		};
 
 		console.log(ChatGPTResponse);
-		const nftName = toTitleCase(ChatGPTResponse.choices[0].text.replace(/\n\n/g, "").split('.').join("").split(',').join(""));
+		const nftName = toTitleCase(
+			ChatGPTResponse.choices[0].text
+				.replace(/\n\n/g, "")
+				.split(".")
+				.join("")
+				.split(",")
+				.join("")
+		);
 		console.log(nftName);
 
-			console.log(`{ "description": "${response.data.text.replace(
-				/\n\n/g,
-				" "
-			)}", "external_url": "https://twitter.com/${
-				response.includes.users[0].username
-			}/status/${tweetID}", "image": "${
-				twitterImage.url
-			}", "name": "${nftName}", "attributes": [
+		console.log(`{ "description": "${response.data.text.replace(
+			/\n\n/g,
+			" "
+		)}", "external_url": "https://twitter.com/${
+			response.includes.users[0].username
+		}/status/${tweetID}", "image": "${
+			twitterImage.url
+		}", "name": "${nftName}", "attributes": [
     {
       "trait_type": "Author", 
       "value": "${response.includes.users[0].name} (@${
-				response.includes.users[0].username
-			})"
+			response.includes.users[0].username
+		})"
     },
 		{
 			"display_type": "date",
@@ -254,6 +275,7 @@ function App() {
 		});
 		const hash = await walletClient.writeContract(request);
 		setHash(hash);
+		setTweetID(tweetID);
 	};
 
 	useEffect(() => {
@@ -265,24 +287,47 @@ function App() {
 			}
 		})();
 	}, [hash]);
+	const return_statement = `<p>Transaction validated! ✅ Head over to <a href="https://testnets.opensea.io/assets/goerli/0x79048c57f1f04febaf453be8cccd6c4cd64ef709/${tweetID}"> OpenSea to check it</a> out.</p>`;
+
+	function shortenString(input) {
+		return input.slice(0, 6) + "..." + input.slice(-3);
+	}
 
 	if (account)
 		return (
 			<>
-				<div>Connected: {account}</div>
-				<input ref={idInput} placeholder="Tweet ID" />
-				<button onClick={mint}>Mint</button>
-				{receipt && (
-					<div>
-						Receipt:{" "}
-						<pre>
-							<code>{stringify(receipt, null, 2)}</code>
-						</pre>
+				<div className="center-screen">
+					<div className="connected">
+						<strong>Connected:</strong> {shortenString(account)}
 					</div>
-				)}
+					<div className="submit">
+						<input className="inputtext" ref={idInput} placeholder="Tweet ID" />
+						<button id="fancy-button" className="button-84" onClick={mint}>
+							<strong>Mint</strong>
+						</button>
+					</div>
+					{receipt && (
+						<div>
+							<div
+								className="content"
+								dangerouslySetInnerHTML={{ __html: return_statement }}
+							></div>
+							{/* Receipt:{" "} */}
+							{/* <pre> */}
+							{/* 	<code>{stringify(receipt, null, 2)}</code> */}
+							{/* </pre> */}
+						</div>
+					)}
+				</div>
 			</>
 		);
-	return <button onClick={connect}>Connect Wallet</button>;
+	return (
+		<div className="center-screen-button">
+			<button className="button-85" onClick={connect}>
+				<strong>Connect Wallet</strong>
+			</button>
+		</div>
+	);
 }
 
 export default App;
