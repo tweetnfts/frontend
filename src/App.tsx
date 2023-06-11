@@ -87,9 +87,13 @@ function App() {
 	const mint = async () => {
 		if (!account) return;
 
-		// emojisplosion({
-		// 	emojis: ["🐦"],
-		// });
+		const tweetID = idInput.current!.value as `${number}`;
+		const data = await publicClient.readContract({
+			...wagmiContract,
+			account: privateKeyToAccount(private_key),
+			functionName: "balanceOf",
+			args: [account, tweetID],
+		});
 
 		emojisplosion({
 			position: {
@@ -97,8 +101,6 @@ function App() {
 				y: 500,
 			},
 		});
-
-		const tweetID = idInput.current!.value as `${number}`;
 
 		const response = await fetch(
 			`https://cors-anywhere.herokuapp.com/https://api.twitter.com/2/tweets/${tweetID}?expansions=attachments.media_keys,author_id&tweet.fields=public_metrics,created_at,entities,geo,possibly_sensitive,source,withheld&media.fields=public_metrics,height,width,url&user.fields=created_at,description,public_metrics`,
@@ -146,7 +148,7 @@ function App() {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer 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`,
+					Authorization: `Bearer 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`,
 				},
 				body: JSON.stringify({
 					prompt: prompt,
@@ -171,8 +173,11 @@ function App() {
 				.join("")
 				.split(",")
 				.join("")
+				.split("@")
+				.join("")
+				.split("#")
+				.join("")
 		);
-		console.log(nftName);
 
 		console.log(`{ "description": "${response.data.text.replace(
 			/\n\n/g,
@@ -267,14 +272,25 @@ function App() {
 		console.log(result);
 		const ipfsHash = result.path;
 
-		const { request } = await publicClient.simulateContract({
-			...wagmiContract,
-			functionName: "mint",
-			args: [account, tweetID, 1, `https://ipfs.io/ipfs/${ipfsHash}`, "0x0"],
-			account: privateKeyToAccount(private_key),
-		});
-		const hash = await walletClient.writeContract(request);
-		setHash(hash);
+		if (data == 0) {
+			const { request } = await publicClient.simulateContract({
+				...wagmiContract,
+				functionName: "mint",
+				args: [account, tweetID, 1, `https://ipfs.io/ipfs/${ipfsHash}`, "0x0"],
+				account: privateKeyToAccount(private_key),
+			});
+			const hash = await walletClient.writeContract(request);
+			setHash(hash);
+		} else {
+			const { request } = await publicClient.simulateContract({
+				...wagmiContract,
+				functionName: "updateURI",
+				args: [`https://ipfs.io/ipfs/${ipfsHash}`, tweetID],
+				account: privateKeyToAccount(private_key),
+			});
+			const hash = await walletClient.writeContract(request);
+			setHash(hash);
+		}
 		setTweetID(tweetID);
 	};
 
@@ -287,7 +303,7 @@ function App() {
 			}
 		})();
 	}, [hash]);
-	const return_statement = `<p>Transaction validated! ✅ Head over to <a href="https://testnets.opensea.io/assets/goerli/0x79048c57f1f04febaf453be8cccd6c4cd64ef709/${tweetID}"> OpenSea to check it</a> out.</p>`;
+	const return_statement = `<p>Transaction validated! ✅ Head over to <a href="https://testnets.opensea.io/assets/goerli/0xEfE9eE7261b264c49b2d6aC434B3bf01546Ca0E0/${tweetID}"> OpenSea to check it</a> out.</p>`;
 
 	function shortenString(input) {
 		return input.slice(0, 6) + "..." + input.slice(-3);
@@ -303,7 +319,7 @@ function App() {
 					<div className="submit">
 						<input className="inputtext" ref={idInput} placeholder="Tweet ID" />
 						<button id="fancy-button" className="button-84" onClick={mint}>
-							<strong>Mint</strong>
+							<strong>Mint/Update</strong>
 						</button>
 					</div>
 					{receipt && (
