@@ -32,7 +32,7 @@ const client = create({
 		authorization:
 			"Basic " +
 			Buffer.from(
-				"2R0Wd1CUP3U2sONZ9KPtsITQzUL:743776d00d42dff9ccca0b92ae0c77af"
+				`${process.env.REACT_APP_INFURA_PUBLIC_KEY}:${process.env.REACT_APP_INFURA_SECRET_KEY}`
 			).toString("base64"),
 	},
 });
@@ -130,7 +130,7 @@ function App() {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					authorization: "85105ac2-ceb4-446f-8993-53339a5b55fb",
+					authorization: `${process.env.REACT_APP_TWEET_PIC_KEY}`,
 				},
 				body: JSON.stringify({
 					url: `https://twitter.com/${response.includes.users[0].username}/status/${tweetID}`,
@@ -148,7 +148,7 @@ function App() {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					Authorization: `Bearer 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`,
+					Authorization: `Bearer ${process.env.REACT_APP_OPENAI_KEY}`,
 				},
 				body: JSON.stringify({
 					prompt: prompt,
