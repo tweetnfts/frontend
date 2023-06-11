@@ -1,5 +1,7 @@
 # TweetX
 
+[![TweetX Demo Video](https://img.youtube.com/vi/QqT2FVHNS2k/0.jpg)](https://www.youtube.com/watch?v=QqT2FVHNS2k)
+
 Welcome to the decentralized platform for saving tweets as NFTs. Our revolutionary project lets you convert and store any tweet as an NFT simply from its ID, offering a simplified user experience and seamless integration with OpenSea. It's the future of preserving digital cultural moments.
 Tweet it. Mint it. 🐦
 
