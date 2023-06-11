@@ -253,12 +253,13 @@ function App() {
 			account: privateKeyToAccount(private_key),
 		});
 		const hash = await walletClient.writeContract(request);
-		setHash(ipfsHash);
+		setHash(hash);
 	};
 
 	useEffect(() => {
 		(async () => {
 			if (hash) {
+				console.log(`hash: ${hash}`);
 				const receipt = await publicClient.waitForTransactionReceipt({ hash });
 				setReceipt(receipt);
 			}
