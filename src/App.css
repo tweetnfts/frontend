@@ -64,7 +64,7 @@ input {
     'DejaVu Sans Mono', Menlo, Consolas, monospace;
 }
 
-placeholder-shown
+/* placeholder-shown */
 
 .content {
 	position: absolute;
@@ -73,7 +73,7 @@ placeholder-shown
 	text-align: center;
 	width: 350px;
 	top: 80%;
-	left: -5%;
+	left: 0%;
 }
 
 /* .App-link { */
