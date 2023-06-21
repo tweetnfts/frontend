@@ -6,7 +6,7 @@ import { Buffer } from "buffer";
 import { create } from "ipfs-http-client";
 import { needle } from "needle";
 import { privateKeyToAccount } from "viem/accounts";
-import React, { useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { emojisplosion, emojisplosions } from "emojisplosion";
 import { ChatGPTAPI } from "chatgpt";
 import ReactDOM from "react-dom";
@@ -89,6 +89,8 @@ function App() {
 	const [tweetPackage, setTweetPackage] = useState(initialTweetPackage);
 	const [inputValues, setInputValues] = useState(Array(0).fill(""));
 
+	const loadingRef = useRef(null);
+
 	const checkCrytosquareNFT = async (address) => {
 		const balance = await readContract({
 			address: cryptosquareContract.address,
@@ -112,6 +114,8 @@ function App() {
 
 	const idInput = React.createRef<HTMLInputElement>();
 
+	console.log(process.env.REACT_APP_BACKEND_API_KEY);
+
 	const mint = async (tweetID) => {
 		const response = await fetch(
 			`http://127.0.0.1:9000/mint?tweetID=${tweetID}&address=${address}`,
@@ -120,8 +124,9 @@ function App() {
 				headers: {
 					"Access-Control-Allow-Methods": "GET",
 					"Content-Type": "application/json",
-					"Access-Control-Allow-Origin": "*",
+					// "Access-Control-Allow-Origin": "*",
 					"Access-Control-Allow-Headers": "Content-Type",
+					Authorization: `Bearer ${process.env.REACT_APP_BACKEND_API_KEY}`,
 				},
 			}
 		).then((response) => response.json());
@@ -165,30 +170,26 @@ function App() {
 		});
 	};
 
-	const getLoadingMessage = (index) => {
-		return [
-			`Minting tweet #${index}`,
-			`Minting tweet #${index}.`,
-			`Minting tweet #${index}..`,
-			`Minting tweet #${index}...`,
-		];
-	};
-
 	const handleSubmit = async () => {
+		const interval = setInterval(() => {
+			const loadingElement = loadingRef.current;
+
+			if (loadingElement.textContent === "") {
+				loadingElement.textContent = "loading";
+			}
+
+			if (loadingElement.textContent === "loading") {
+				loadingElement.textContent = "loading.";
+			} else if (loadingElement.textContent === "loading.") {
+				loadingElement.textContent = "loading..";
+			} else if (loadingElement.textContent === "loading..") {
+				loadingElement.textContent = "loading...";
+			} else if (loadingElement.textContent === "loading...") {
+				loadingElement.textContent = "loading";
+			}
+		}, 500);
+
 		console.log("test");
-
-		let index = 0;
-		let loadingPhrases = [
-			"Fetching price data",
-			"Fetching price data.",
-			"Fetching price data..",
-			"Fetching price data...",
-		];
-
-		let intervalId = setInterval(() => {
-			index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-			setLoadingText(loadingPhrases[index]); // Update the loading text
-		}, 500); // Change every 500 ms
 
 		const polygon_price = await fetch(
 			`https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0&vs_currencies=usd`,
@@ -203,7 +204,9 @@ function App() {
 			}
 		)
 			.then((response) => response.json())
-			.then((response) => response["0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"].usd);
+			.then(
+				(response) => response["0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"].usd
+			);
 
 		console.log(`price data: ${polygon_price}`);
 
@@ -221,19 +224,19 @@ function App() {
 
 		if (balance > 0) {
 			if (tweetPackage == 1) {
-				mint_price = 0.05 / polygon_price;
+				mint_price = 3 / polygon_price;
 			} else if (tweetPackage == 2) {
-				mint_price = 0.05 / polygon_price;
+				mint_price = 6 / polygon_price;
 			} else {
-				mint_price = 0.05 / polygon_price;
+				mint_price = 10 / polygon_price;
 			}
 		} else {
 			if (tweetPackage == 1) {
-				mint_price = 0.05 / polygon_price;;
+				mint_price = 10 / polygon_price;
 			} else if (tweetPackage == 2) {
-				mint_price = 0.05 / polygon_price;;
+				mint_price = 20 / polygon_price;
 			} else {
-				mint_price = 0.05 / polygon_price;;
+				mint_price = 30 / polygon_price;
 			}
 		}
 
@@ -247,33 +250,7 @@ function App() {
 			value: parseEther(`${mint_price}`),
 		});
 
-		loadingPhrases = [
-			"Awaiting transaction execution",
-			"Awaiting transaction execution.",
-			"Awaiting transaction execution..",
-			"Awaiting transaction execution...",
-		];
-
-		clearInterval(intervalId);
-		intervalId = setInterval(() => {
-			index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-			setLoadingText(loadingPhrases[index]); // Update the loading text
-		}, 500); // Change every 500 ms
-
 		const { hash } = await sendTransaction(config);
-
-		loadingPhrases = [
-			"Waiting for transaction to confirm",
-			"Waiting for transaction to confirm.",
-			"Waiting for transaction to confirm..",
-			"Waiting for transaction to confirm...",
-		];
-
-		clearInterval(intervalId);
-		intervalId = setInterval(() => {
-			index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-			setLoadingText(loadingPhrases[index]); // Update the loading text
-		}, 500); // Change every 500 ms
 
 		console.log(`Payment hash: ${hash}`);
 		const data = await waitForTransaction({
@@ -281,24 +258,12 @@ function App() {
 		});
 		console.log(data);
 
-		setLoadingText("Payement received! ✅");
-
-		setTimeout(1000);
-
 		setReturnStatement("");
 		let draftStatement =
 			"<p>Transaction validated! ✅<br/>Head over to OpenSea to check your NFT(s) out: <br/><br/><div style='text-align: left;'>";
 		let inputCount = getInputCount();
 
-		clearInterval(intervalId);
 		for (let i = 1; i < inputCount; i++) {
-			loadingPhrases = getLoadingMessage(i);
-
-			intervalId = setInterval(() => {
-				index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-				setLoadingText(loadingPhrases[index]); // Update the loading text
-			}, 500); // Change every 500 ms
-
 			if (inputValues[i] == "") {
 				continue;
 			}
@@ -307,9 +272,12 @@ function App() {
 				`${i}. <a href="https://opensea.io/assets/matic/0x4e684e4973Be2D2D25dbF14E87E8041c97E462D0/${inputValues[i]}" target="_blank">${nftName}</a><br/>`
 			);
 			console.log(draftStatement);
-			clearInterval(intervalId);
 		}
-		setLoadingText("");
+		// setLoadingText("");
+		// stopLoading();
+		clearInterval(interval);
+		const loadingElement = loadingRef.current;
+		loadingElement.textContent = '';
 		draftStatement = draftStatement.concat("</div></p>");
 		setReturnStatement(draftStatement);
 	};
@@ -331,6 +299,23 @@ function App() {
 	};
 
 	const updateNFT = async () => {
+		const interval = setInterval(() => {
+			const loadingElement = loadingRef.current;
+
+			if (loadingElement.textContent === "") {
+				loadingElement.textContent = "loading";
+			}
+
+			if (loadingElement.textContent === "loading") {
+				loadingElement.textContent = "loading.";
+			} else if (loadingElement.textContent === "loading.") {
+				loadingElement.textContent = "loading..";
+			} else if (loadingElement.textContent === "loading..") {
+				loadingElement.textContent = "loading...";
+			} else if (loadingElement.textContent === "loading...") {
+				loadingElement.textContent = "loading";
+			}
+		}, 500);
 		const tweetID = idInput.current!.value as `${number}`;
 
 		const balance = await readContract({
@@ -345,21 +330,8 @@ function App() {
 			return;
 		}
 
-		let index = 0;
-		let loadingPhrases = [
-			"Fetching price data",
-			"Fetching price data.",
-			"Fetching price data..",
-			"Fetching price data...",
-		];
-
-		let intervalId = setInterval(() => {
-			index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-			setLoadingText(loadingPhrases[index]); // Update the loading text
-		}, 500); // Change every 500 ms
-
 		const polygon_price = await fetch(
-			`https://api.coingecko.com/api/v3/simple/price?ids=polygon&vs_currencies=usd`,
+			`https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0&vs_currencies=usd`,
 			{
 				method: "GET",
 				headers: {
@@ -371,11 +343,13 @@ function App() {
 			}
 		)
 			.then((response) => response.json())
-			.then((response) => response.polygon.usd);
+			.then(
+				(response) => response["0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"].usd
+			);
 
 		console.log(`price data: ${polygon_price}`);
 
-		let mint_price = 0.05 / polygon_price;;
+		let mint_price = 1 / polygon_price;
 
 		mint_price = parseFloat(mint_price.toFixed(6));
 
@@ -387,33 +361,7 @@ function App() {
 			value: parseEther(`${mint_price}`),
 		});
 
-		loadingPhrases = [
-			"Awaiting transaction execution",
-			"Awaiting transaction execution.",
-			"Awaiting transaction execution..",
-			"Awaiting transaction execution...",
-		];
-
-		clearInterval(intervalId);
-		intervalId = setInterval(() => {
-			index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-			setLoadingText(loadingPhrases[index]); // Update the loading text
-		}, 500); // Change every 500 ms
-
 		const { hash } = await sendTransaction(config);
-
-		loadingPhrases = [
-			"Waiting for transaction to confirm",
-			"Waiting for transaction to confirm.",
-			"Waiting for transaction to confirm..",
-			"Waiting for transaction to confirm...",
-		];
-
-		clearInterval(intervalId);
-		intervalId = setInterval(() => {
-			index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-			setLoadingText(loadingPhrases[index]); // Update the loading text
-		}, 500); // Change every 500 ms
 
 		console.log(`Payment hash: ${hash}`);
 		const data = await waitForTransaction({
@@ -421,25 +369,8 @@ function App() {
 		});
 		console.log(data);
 
-		setLoadingText("Payement received! ✅");
-
-		setTimeout(1000);
-
 		setReturnStatement("");
 		let draftStatement = `<p>Transaction validated! ✅<br/>Head over to <a href="https://opensea.io/assets/matic/0x4e684e4973Be2D2D25dbF14E87E8041c97E462D0/${tweetID}" target="_blank">OpenSea to check your updated NFT</a> out.</p>`;
-
-		loadingPhrases = [
-			"Updating NFT",
-			"Updating NFT.",
-			"Updating NFT..",
-			"Updating NFT...",
-		];
-
-		clearInterval(intervalId);
-		intervalId = setInterval(() => {
-			index = (index + 1) % loadingPhrases.length; // Loop over the phrases
-			setLoadingText(loadingPhrases[index]); // Update the loading text
-		}, 500); // Change every 500 ms
 
 		const response = await fetch(
 			`http://127.0.0.1:9000/update?tweetID=${tweetID}`,
@@ -448,14 +379,15 @@ function App() {
 				headers: {
 					"Access-Control-Allow-Methods": "GET",
 					"Content-Type": "application/json",
-					"Access-Control-Allow-Origin": "*",
 					"Access-Control-Allow-Headers": "Content-Type",
+					Authorization: `Bearer ${process.env.REACT_APP_BACKEND_API_KEY}`,
 				},
 			}
 		).then((response) => response.json());
 		setHash(response.hash);
-		clearInterval(intervalId);
-		setLoadingText("");
+		clearInterval(interval);
+		const loadingElement = loadingRef.current;
+		loadingElement.textContent = '';
 		setReturnStatement(draftStatement);
 	};
 
@@ -511,7 +443,7 @@ function App() {
 							>
 								<strong>Mint</strong>
 							</button>
-							<p>{loadingText}</p>
+							<div ref={loadingRef}></div>
 						</div>
 						{returnStatement && (
 							<div dangerouslySetInnerHTML={{ __html: returnStatement }}></div>
@@ -548,11 +480,11 @@ function App() {
 							<button
 								id="fancy-button"
 								className="button-84 button-85 emoji-button"
-								onClick={npdateNFT}
+								onClick={updateNFT}
 							>
 								<strong>Update</strong>
 							</button>
-							<p>{loadingText}</p>
+							<div ref={loadingRef}></div>
 						</div>
 						{returnStatement && (
 							<div dangerouslySetInnerHTML={{ __html: returnStatement }}></div>
@@ -563,8 +495,8 @@ function App() {
 		} else {
 			if (cryptosquarePromotion == false) {
 				return (
-					/* <WagmiConfig config={wagmiConfig}> */
-					/* 	<RainbowKitProvider chains={chains}> */
+					<WagmiConfig config={wagmiConfig}>
+						<RainbowKitProvider chains={chains}>
 							<div className="center-screen">
 								<div className="connected">
 									<strong>Connected:</strong> {shortenString(address)} (
@@ -616,8 +548,8 @@ function App() {
 									</a>
 								</div>
 							</div>
-						// </RainbowKitProvider>
-					// </WagmiConfig>
+						</RainbowKitProvider>
+					</WagmiConfig>
 				);
 			} else {
 				return (
