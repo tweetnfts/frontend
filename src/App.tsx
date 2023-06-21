@@ -563,8 +563,8 @@ function App() {
 		} else {
 			if (cryptosquarePromotion == false) {
 				return (
-					<WagmiConfig config={wagmiConfig}>
-						<RainbowKitProvider chains={chains}>
+					/* <WagmiConfig config={wagmiConfig}> */
+					/* 	<RainbowKitProvider chains={chains}> */
 							<div className="center-screen">
 								<div className="connected">
 									<strong>Connected:</strong> {shortenString(address)} (
@@ -616,8 +616,8 @@ function App() {
 									</a>
 								</div>
 							</div>
-						</RainbowKitProvider>
-					</WagmiConfig>
+						// </RainbowKitProvider>
+					// </WagmiConfig>
 				);
 			} else {
 				return (
