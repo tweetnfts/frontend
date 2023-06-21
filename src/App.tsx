@@ -80,37 +80,37 @@ function App() {
 	const [hash, setHash] = useState("");
 	const [returnStatement, setReturnStatement] = useState("");
 	const [loadingText, setLoadingText] = useState("");
-	const initialCryptosquarePromotion =
-		localStorage.getItem("cryptosquarePromotion") || false;
-	const [cryptosquarePromotion, setCryptosquarePromotion] = useState(
-		initialCryptosquarePromotion
-	);
+	// const initialCryptosquarePromotion =
+	// 	localStorage.getItem("cryptosquarePromotion") || false;
+	// const [cryptosquarePromotion, setCryptosquarePromotion] = useState(
+	// 	initialCryptosquarePromotion
+	// );
 	const initialTweetPackage = Number(localStorage.getItem("tweetPackage")) || 0;
 	const [tweetPackage, setTweetPackage] = useState(initialTweetPackage);
 	const [inputValues, setInputValues] = useState(Array(0).fill(""));
 
 	const loadingRef = useRef(null);
 
-	const checkCrytosquareNFT = async (address) => {
-		const balance = Number(await readContract({
-			address: cryptosquareContract.address,
-			abi: cryptosquareContract.abi,
-			functionName: "balanceOf",
-			args: [address],
-			chainId: 1,
-		}));
-		if (balance > 0) {
-			setCryptosquarePromotion(true);
-		} else {
-			setCryptosquarePromotion(false);
-		}
-	};
+	// const checkCrytosquareNFT = async (address) => {
+	// 	const balance = Number(await readContract({
+	// 		address: cryptosquareContract.address,
+	// 		abi: cryptosquareContract.abi,
+	// 		functionName: "balanceOf",
+	// 		args: [address],
+	// 		chainId: 1,
+	// 	}));
+	// 	if (balance > 0) {
+	// 		setCryptosquarePromotion(true);
+	// 	} else {
+	// 		setCryptosquarePromotion(false);
+	// 	}
+	// };
 
-	let discount;
+	// let discount;
 	const { address, isConnected } = useAccount();
-	if (isConnected) {
-		checkCrytosquareNFT(address);
-	}
+	// if (isConnected) {
+	// 	checkCrytosquareNFT(address);
+	// }
 
 	const idInput = React.createRef<HTMLInputElement>();
 
@@ -122,7 +122,7 @@ function App() {
 				headers: {
 					"Access-Control-Allow-Methods": "GET",
 					"Content-Type": "application/json",
-					// "Access-Control-Allow-Origin": "*",
+					"Access-Control-Allow-Origin": "*",
 					"Access-Control-Allow-Headers": "Content-Type",
 					Authorization: `Bearer ${process.env.REACT_APP_BACKEND_API_KEY}`,
 				},
@@ -143,9 +143,9 @@ function App() {
 		localStorage.setItem("tweetPackage", tweetPackage);
 	}, [tweetPackage]);
 
-	useEffect(() => {
-		localStorage.setItem("cryptosquarePromotion", cryptosquarePromotion);
-	}, [cryptosquarePromotion]);
+	// useEffect(() => {
+	// 	localStorage.setItem("cryptosquarePromotion", cryptosquarePromotion);
+	// }, [cryptosquarePromotion]);
 
 	useEffect(() => {
 		let inputCount = getInputCount();
@@ -172,7 +172,7 @@ function App() {
 		const interval = setInterval(() => {
 			const loadingElement = loadingRef.current;
 
-			if (loadingElement.textContent === "") {
+			if (!loadingElement.textContent) {
 				loadingElement.textContent = "loading";
 			}
 
@@ -210,33 +210,35 @@ function App() {
 
 		let mint_price;
 
-		const balance = Number(await readContract({
-			address: cryptosquareContract.address,
-			abi: cryptosquareContract.abi,
-			functionName: "balanceOf",
-			args: [address],
-			chainId: 1,
-		}));
+		// const balance = Number(
+		// 	await readContract({
+		// 		address: cryptosquareContract.address,
+		// 		abi: cryptosquareContract.abi,
+		// 		functionName: "balanceOf",
+		// 		args: [address],
+		// 		chainId: 1,
+		// 	})
+		// );
 
-		console.log(`address: ${address}, balance: ${balance}`);
+		// console.log(`address: ${address}, balance: ${balance}`);
 
-		if (balance > 0) {
-			if (tweetPackage == 1) {
-				mint_price = 3 / polygon_price;
-			} else if (tweetPackage == 2) {
-				mint_price = 6 / polygon_price;
-			} else {
-				mint_price = 10 / polygon_price;
-			}
+		// if (balance > 0) {
+		// 	if (tweetPackage == 1) {
+		// 		mint_price = 3 / polygon_price;
+		// 	} else if (tweetPackage == 2) {
+		// 		mint_price = 6 / polygon_price;
+		// 	} else {
+		// 		mint_price = 10 / polygon_price;
+		// 	}
+		// } else {
+		if (tweetPackage == 1) {
+			mint_price = 3 / polygon_price;
+		} else if (tweetPackage == 2) {
+			mint_price = 6 / polygon_price;
 		} else {
-			if (tweetPackage == 1) {
-				mint_price = 10 / polygon_price;
-			} else if (tweetPackage == 2) {
-				mint_price = 20 / polygon_price;
-			} else {
-				mint_price = 30 / polygon_price;
-			}
+			mint_price = 10 / polygon_price;
 		}
+		// }
 
 		mint_price = parseFloat(mint_price.toFixed(6));
 
@@ -244,7 +246,7 @@ function App() {
 
 		const config = await prepareSendTransaction({
 			chainId: 137,
-			to: "0xb4bf8a8475D1E8e9A2088F118AD0E2cDc2896183",
+			to: "0xB9eF88F9749E653f40c7A444A179b3Ef5a65a99c",
 			value: parseEther(`${mint_price}`),
 		});
 
@@ -275,7 +277,7 @@ function App() {
 		// stopLoading();
 		clearInterval(interval);
 		const loadingElement = loadingRef.current;
-		loadingElement.textContent = '';
+		loadingElement.textContent = "";
 		draftStatement = draftStatement.concat("</div></p>");
 		setReturnStatement(draftStatement);
 	};
@@ -316,17 +318,17 @@ function App() {
 		}, 500);
 		const tweetID = idInput.current!.value as `${number}`;
 
-		const balance = Number(await readContract({
-			address: tweetnftsContract.address,
-			abi: tweetnftsContract.abi,
-			functionName: "balanceOf",
-			args: [address, tweetID],
-			chainId: 137,
-		}));
+		// const balance = Number(await readContract({
+		// 	address: tweetnftsContract.address,
+		// 	abi: tweetnftsContract.abi,
+		// 	functionName: "balanceOf",
+		// 	args: [address, tweetID],
+		// 	chainId: 137,
+		// }));
 
-		if (balance == 0) {
-			return;
-		}
+		// if (balance == 0) {
+		// 	return;
+		// }
 
 		const polygon_price = await fetch(
 			`https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0&vs_currencies=usd`,
@@ -355,7 +357,7 @@ function App() {
 
 		const config = await prepareSendTransaction({
 			chainId: 137,
-			to: "0xb4bf8a8475D1E8e9A2088F118AD0E2cDc2896183",
+			to: "0xB9eF88F9749E653f40c7A444A179b3Ef5a65a99c",
 			value: parseEther(`${mint_price}`),
 		});
 
@@ -377,6 +379,7 @@ function App() {
 				headers: {
 					"Access-Control-Allow-Methods": "GET",
 					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*",
 					"Access-Control-Allow-Headers": "Content-Type",
 					Authorization: `Bearer ${process.env.REACT_APP_BACKEND_API_KEY}`,
 				},
@@ -385,7 +388,7 @@ function App() {
 		setHash(response.hash);
 		clearInterval(interval);
 		const loadingElement = loadingRef.current;
-		loadingElement.textContent = '';
+		loadingElement.textContent = "";
 		setReturnStatement(draftStatement);
 	};
 
@@ -490,114 +493,118 @@ function App() {
 					</div>
 				</>
 			);
-		} else {
-			if (cryptosquarePromotion == false) {
-				return (
-					<WagmiConfig config={wagmiConfig}>
-						<RainbowKitProvider chains={chains}>
-							<div className="center-screen">
-								<div className="connected">
-									<strong>Connected:</strong> {shortenString(address)} (
-									<a className="disconnect" href="" onClick={disconnectWallet}>
-										disconnect
-									</a>
-									)
-									<br />
-									<br />
-									Payments are made in MATIC.
-									<hr />
-									<br />
-									<br />
-								</div>
-								<div className="tweetPackage">
-									<a
-										className="tweetPackageElement"
-										href=""
-										onClick={() => setTweetPackage(1)}
-									>
-										Mint 1 tweet for 10$
-									</a>
-									<br />
-									<br />
-									<a
-										className="tweetPackageElement"
-										href=""
-										onClick={() => setTweetPackage(2)}
-									>
-										Mint 3 tweets for 20$ (save 34%)
-									</a>
-									<br />
-									<br />
-									<a
-										className="tweetPackageElement"
-										href=""
-										onClick={() => setTweetPackage(3)}
-									>
-										Mint 10 tweets for 30$ (save 70%)
-									</a>
-									<br />
-									<br />
-									<a
-										className="tweetPackageElement"
-										href=""
-										onClick={() => setTweetPackage(4)}
-									>
-										Update 1 NFT for 1$
-									</a>
-								</div>
-							</div>
-						</RainbowKitProvider>
-					</WagmiConfig>
-				);
-			} else {
-				return (
-					<WagmiConfig config={wagmiConfig}>
-						<RainbowKitProvider chains={chains}>
-							<div className="center-screen">
-								<div className="connected">
-									<strong>Connected:</strong> {shortenString(address)} (
-									<a className="disconnect" href="" onClick={disconnectWallet}>
-										disconnect
-									</a>
-									)
-									<hr />
-									<br />
-									<br />
-								</div>
-								<div className="tweetPackage">
-									<a
-										className="tweetPackageElement"
-										href=""
-										onClick={() => setTweetPackage(1)}
-									>
-										3$ for 1 tweet (save 70% thanks to Choos3n)
-									</a>
-									<br />
-									<br />
-									<a
-										className="tweetPackageElement"
-										href=""
-										onClick={() => setTweetPackage(2)}
-									>
-										6$ for 3 tweets (save 80% thanks to Choos3n)
-									</a>
-									<br />
-									<br />
-									<a
-										className="tweetPackageElement"
-										href=""
-										onClick={() => setTweetPackage(3)}
-									>
-										10$ for 10 tweets (save 90% thanks to Choos3n)
-									</a>
-								</div>
-							</div>
-						</RainbowKitProvider>
-					</WagmiConfig>
-				);
-			}
 		}
-	} else {
+		else {
+		// if (cryptosquarePromotion == false) {
+			return (
+				<WagmiConfig config={wagmiConfig}>
+					<RainbowKitProvider chains={chains}>
+						<div className="center-screen">
+							<div className="connected">
+								<strong>Connected:</strong> {shortenString(address)} (
+								<a className="disconnect" href="" onClick={disconnectWallet}>
+									disconnect
+								</a>
+								)
+								<br />
+								<br />
+								Payments are made in MATIC.
+								<hr />
+								<br />
+								<br />
+							</div>
+							<div className="tweetPackage">
+								<a
+									className="tweetPackageElement"
+									href=""
+									onClick={() => setTweetPackage(1)}
+								>
+									Mint 1 tweet for 3$ (save 70% (only today!))
+								</a>
+								<br />
+								<br />
+								<a
+									className="tweetPackageElement"
+									href=""
+									onClick={() => setTweetPackage(2)}
+								>
+									Mint 3 tweets for 6$ (save 80% (only today!))
+								</a>
+								<br />
+								<br />
+								<a
+									className="tweetPackageElement"
+									href=""
+									onClick={() => setTweetPackage(3)}
+								>
+									Mint 10 tweets for 10$ (save 90% (only today!))
+								</a>
+								<br />
+								<br />
+								<a
+									className="tweetPackageElement"
+									href=""
+									onClick={() => setTweetPackage(4)}
+								>
+									Update 1 NFT for 1$
+								</a>
+							</div>
+						</div>
+					</RainbowKitProvider>
+				</WagmiConfig>
+			);
+		}
+		// }
+		// else {
+		// 	return (
+		// 		<WagmiConfig config={wagmiConfig}>
+		// 			<RainbowKitProvider chains={chains}>
+		// 				<div className="center-screen">
+		// 					<div className="connected">
+		// 						<strong>Connected:</strong> {shortenString(address)} (
+		// 						<a className="disconnect" href="" onClick={disconnectWallet}>
+		// 							disconnect
+		// 						</a>
+		// 						)
+		// 						<hr />
+		// 						<br />
+		// 						<br />
+		// 					</div>
+		// 					<div className="tweetPackage">
+		// 						<a
+		// 							className="tweetPackageElement"
+		// 							href=""
+		// 							onClick={() => setTweetPackage(1)}
+		// 						>
+		// 							3$ for 1 tweet (save 70% thanks to Choos3n)
+		// 						</a>
+		// 						<br />
+		// 						<br />
+		// 						<a
+		// 							className="tweetPackageElement"
+		// 							href=""
+		// 							onClick={() => setTweetPackage(2)}
+		// 						>
+		// 							6$ for 3 tweets (save 80% thanks to Choos3n)
+		// 						</a>
+		// 						<br />
+		// 						<br />
+		// 						<a
+		// 							className="tweetPackageElement"
+		// 							href=""
+		// 							onClick={() => setTweetPackage(3)}
+		// 						>
+		// 							10$ for 10 tweets (save 90% thanks to Choos3n)
+		// 						</a>
+		// 					</div>
+		// 				</div>
+		// 			</RainbowKitProvider>
+		// 		</WagmiConfig>
+		// 	);
+		// }
+		// }
+	}
+	else {
 		return (
 			<>
 				<WagmiConfig config={wagmiConfig}>
