@@ -114,8 +114,6 @@ function App() {
 
 	const idInput = React.createRef<HTMLInputElement>();
 
-	console.log(process.env.REACT_APP_BACKEND_API_KEY);
-
 	const mint = async (tweetID) => {
 		const response = await fetch(
 			`https://api.tweetnfts.xyz/mint?tweetID=${tweetID}&address=${address}`,
