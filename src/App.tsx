@@ -118,7 +118,7 @@ function App() {
 
 	const mint = async (tweetID) => {
 		const response = await fetch(
-			`http://127.0.0.1:9000/mint?tweetID=${tweetID}&address=${address}`,
+			`https://api.tweetnfts.xyz/mint?tweetID=${tweetID}&address=${address}`,
 			{
 				method: "GET",
 				headers: {
@@ -373,7 +373,7 @@ function App() {
 		let draftStatement = `<p>Transaction validated! ✅<br/>Head over to <a href="https://opensea.io/assets/matic/0x4e684e4973Be2D2D25dbF14E87E8041c97E462D0/${tweetID}" target="_blank">OpenSea to check your updated NFT</a> out.</p>`;
 
 		const response = await fetch(
-			`http://127.0.0.1:9000/update?tweetID=${tweetID}`,
+			`https://api.tweetnfts.xyz/update?tweetID=${tweetID}`,
 			{
 				method: "GET",
 				headers: {
