@@ -92,13 +92,13 @@ function App() {
 	const loadingRef = useRef(null);
 
 	const checkCrytosquareNFT = async (address) => {
-		const balance = await readContract({
+		const balance = Number(await readContract({
 			address: cryptosquareContract.address,
 			abi: cryptosquareContract.abi,
 			functionName: "balanceOf",
 			args: [address],
 			chainId: 1,
-		});
+		}));
 		if (balance > 0) {
 			setCryptosquarePromotion(true);
 		} else {
@@ -210,13 +210,13 @@ function App() {
 
 		let mint_price;
 
-		const balance = await readContract({
+		const balance = Number(await readContract({
 			address: cryptosquareContract.address,
 			abi: cryptosquareContract.abi,
 			functionName: "balanceOf",
 			args: [address],
 			chainId: 1,
-		});
+		}));
 
 		console.log(`address: ${address}, balance: ${balance}`);
 
@@ -316,13 +316,13 @@ function App() {
 		}, 500);
 		const tweetID = idInput.current!.value as `${number}`;
 
-		const balance = await readContract({
+		const balance = Number(await readContract({
 			address: tweetnftsContract.address,
 			abi: tweetnftsContract.abi,
 			functionName: "balanceOf",
 			args: [address, tweetID],
 			chainId: 137,
-		});
+		}));
 
 		if (balance == 0) {
 			return;
