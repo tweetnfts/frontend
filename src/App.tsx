@@ -90,6 +90,7 @@ function App() {
 	const [inputValues, setInputValues] = useState(Array(0).fill(""));
 
 	const loadingRef = useRef(null);
+	const mintPriceRef = useRef(null);
 
 	// const checkCrytosquareNFT = async (address) => {
 	// 	const balance = Number(await readContract({
@@ -114,7 +115,43 @@ function App() {
 
 	const idInput = React.createRef<HTMLInputElement>();
 
+	const mintPrice = async () => {
+		let polygon_price = await fetch(
+			`https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0&vs_currencies=usd`,
+			{
+				method: "GET",
+				headers: {
+					"Access-Control-Allow-Methods": "GET",
+					"Content-Type": "application/json",
+					"Access-Control-Allow-Origin": "*",
+					"Access-Control-Allow-Headers": "Content-Type",
+				},
+			}
+		)
+			.then((response) => response.json())
+			.then(
+				(response) => response["0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0"].usd
+			);
+
+		let mint_price;
+
+		if (tweetPackage == 1) {
+			mint_price = 1 / polygon_price;
+		} else if (tweetPackage == 2) {
+			mint_price = 2 / polygon_price;
+		} else if (tweetPackage == 3) {
+			mint_price = 3 / polygon_price;
+		} else {
+			mint_price = 1 / polygon_price;
+		}
+
+		mint_price = parseFloat(mint_price.toFixed(6));
+		const mintPriceElement = mintPriceRef.current;
+		mintPriceElement.textContent = mint_price;
+	};
+
 	const mint = async (tweetID) => {
+		console.log(tweetID);
 		const response = await fetch(
 			`https://api.tweetnfts.xyz/mint?tweetID=${tweetID}&address=${address}`,
 			{
@@ -141,11 +178,23 @@ function App() {
 
 	useEffect(() => {
 		localStorage.setItem("tweetPackage", tweetPackage);
+		mintPrice();
 	}, [tweetPackage]);
 
 	// useEffect(() => {
 	// 	localStorage.setItem("cryptosquarePromotion", cryptosquarePromotion);
 	// }, [cryptosquarePromotion]);
+
+	function extractTwitterStatusId(urlOrId) {
+		var regex = /(?:status\/)?(\d+)/;
+		var match = urlOrId.match(regex);
+
+		if (match) {
+			return match[1]; // return the matched group
+		} else {
+			return null; // no match found
+		}
+	}
 
 	useEffect(() => {
 		let inputCount = getInputCount();
@@ -267,9 +316,9 @@ function App() {
 			if (inputValues[i] == "") {
 				continue;
 			}
-			const nftName = await mint(inputValues[i]);
+			const nftName = await mint(extractTwitterStatusId(inputValues[i]));
 			draftStatement = draftStatement.concat(
-				`${i}. <a href="https://opensea.io/assets/matic/0x4e684e4973Be2D2D25dbF14E87E8041c97E462D0/${inputValues[i]}" target="_blank">${nftName}</a><br/>`
+				`${i}. <a href="https://opensea.io/assets/matic/0x4e684e4973Be2D2D25dbF14E87E8041c97E462D0/${extractTwitterStatusId(inputValues[i])}" target="_blank">${nftName}</a><br/>`
 			);
 			console.log(draftStatement);
 		}
@@ -316,7 +365,9 @@ function App() {
 				loadingElement.textContent = "loading";
 			}
 		}, 500);
-		const tweetID = idInput.current!.value as `${number}`;
+		const tweetID = extractTwitterStatusId(idInput.current!.value) as `${number}`;
+
+		console.log(tweetID);
 
 		// const balance = Number(await readContract({
 		// 	address: tweetnftsContract.address,
@@ -401,7 +452,7 @@ function App() {
 				<input
 					key={i}
 					className="inputtext"
-					placeholder="Tweet ID"
+					placeholder="Tweet link or ID"
 					onChange={(event) => handleChange(i, event)}
 				/>
 			);
@@ -442,7 +493,10 @@ function App() {
 								className="button-84 button-85 emoji-button"
 								onClick={handleSubmit}
 							>
-								<strong>Mint</strong>
+								<strong>
+									Mint for <span ref={mintPriceRef}>[loading price...]</span>{" "}
+									MATIC
+								</strong>
 							</button>
 							<div ref={loadingRef}></div>
 						</div>
@@ -476,14 +530,15 @@ function App() {
 							<input
 								className="inputtext"
 								ref={idInput}
-								placeholder="Tweet ID"
+								placeholder="Tweet link or ID"
 							/>
 							<button
 								id="fancy-button"
 								className="button-84 button-85 emoji-button"
 								onClick={updateNFT}
 							>
-								<strong>Update</strong>
+								<strong>Update for <span ref={mintPriceRef}>[loading price...]</span>{" "}
+									MATIC</strong>
 							</button>
 							<div ref={loadingRef}></div>
 						</div>
@@ -493,9 +548,8 @@ function App() {
 					</div>
 				</>
 			);
-		}
-		else {
-		// if (cryptosquarePromotion == false) {
+		} else {
+			// if (cryptosquarePromotion == false) {
 			return (
 				<WagmiConfig config={wagmiConfig}>
 					<RainbowKitProvider chains={chains}>
@@ -514,40 +568,39 @@ function App() {
 								<br />
 							</div>
 							<div className="tweetPackage">
-								<a
-									className="tweetPackageElement"
-									href=""
+								<button
+									className="button-86"
 									onClick={() => setTweetPackage(1)}
 								>
 									Mint 1 tweet for 1$ (special 90% promo)
-								</a>
+								</button>
 								<br />
 								<br />
-								<a
-									className="tweetPackageElement"
+								<button
+									className="button-86"
 									href=""
 									onClick={() => setTweetPackage(2)}
 								>
 									Mint 3 tweets for 2$ (special 90% promo)
-								</a>
+								</button>
 								<br />
 								<br />
-								<a
-									className="tweetPackageElement"
+								<button
+									className="button-86"
 									href=""
 									onClick={() => setTweetPackage(3)}
 								>
 									Mint 10 tweets for 3$ (special 90% promo)
-								</a>
+								</button>
 								<br />
 								<br />
-								<a
-									className="tweetPackageElement"
+								<button
+									className="button-86"
 									href=""
 									onClick={() => setTweetPackage(4)}
 								>
 									Update 1 NFT for 1$
-								</a>
+								</button>
 							</div>
 						</div>
 					</RainbowKitProvider>
@@ -603,8 +656,7 @@ function App() {
 		// 	);
 		// }
 		// }
-	}
-	else {
+	} else {
 		return (
 			<>
 				<WagmiConfig config={wagmiConfig}>

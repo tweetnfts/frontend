@@ -40,7 +40,7 @@ a {
 
 .disconnect {
 	color: #FFF;
-	text-decoration: none;
+	text-decoration: underline;
 }
 
 .disconnect:hover {
@@ -242,4 +242,21 @@ input {
   border-radius: 10px;
   font-family: "SF Mono", SFMono-Regular, ui-monospace, "DejaVu Sans Mono",
     Menlo, Consolas, monospace;
+}
+
+.button-86 {
+  padding: 0.6em 2em;
+  border: 1px solid white;
+  outline: none;
+  color: rgb(255, 255, 255);
+  background: #202020;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 10px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+	font-family: 'SF Mono', SFMono-Regular, ui-monospace,
+    'DejaVu Sans Mono', Menlo, Consolas, monospace;
 }
