@@ -232,11 +232,11 @@ function App() {
 		// 	}
 		// } else {
 		if (tweetPackage == 1) {
-			mint_price = 3 / polygon_price;
+			mint_price = 1 / polygon_price;
 		} else if (tweetPackage == 2) {
-			mint_price = 6 / polygon_price;
+			mint_price = 2 / polygon_price;
 		} else {
-			mint_price = 10 / polygon_price;
+			mint_price = 3 / polygon_price;
 		}
 		// }
 
@@ -519,7 +519,7 @@ function App() {
 									href=""
 									onClick={() => setTweetPackage(1)}
 								>
-									Mint 1 tweet for 3$ (save 70% (only today!))
+									Mint 1 tweet for 1$ (special 90% promo)
 								</a>
 								<br />
 								<br />
@@ -528,7 +528,7 @@ function App() {
 									href=""
 									onClick={() => setTweetPackage(2)}
 								>
-									Mint 3 tweets for 6$ (save 80% (only today!))
+									Mint 3 tweets for 2$ (special 90% promo)
 								</a>
 								<br />
 								<br />
@@ -537,7 +537,7 @@ function App() {
 									href=""
 									onClick={() => setTweetPackage(3)}
 								>
-									Mint 10 tweets for 10$ (save 90% (only today!))
+									Mint 10 tweets for 3$ (special 90% promo)
 								</a>
 								<br />
 								<br />
