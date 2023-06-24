@@ -186,11 +186,11 @@ function App() {
 	// }, [cryptosquarePromotion]);
 
 	function extractTwitterStatusId(urlOrId) {
-		var regex = /(?:status\/)?(\d+)/;
+		var regex = /\/status\/(\d+)|^(\d+)$/;
 		var match = urlOrId.match(regex);
 
 		if (match) {
-			return match[1]; // return the matched group
+			return match[1] || match[2]; // return the matched group
 		} else {
 			return null; // no match found
 		}
@@ -318,7 +318,9 @@ function App() {
 			}
 			const nftName = await mint(extractTwitterStatusId(inputValues[i]));
 			draftStatement = draftStatement.concat(
-				`${i}. <a href="https://opensea.io/assets/matic/0x4e684e4973Be2D2D25dbF14E87E8041c97E462D0/${extractTwitterStatusId(inputValues[i])}" target="_blank">${nftName}</a><br/>`
+				`${i}. <a href="https://opensea.io/assets/matic/0x4e684e4973Be2D2D25dbF14E87E8041c97E462D0/${extractTwitterStatusId(
+					inputValues[i]
+				)}" target="_blank">${nftName}</a><br/>`
 			);
 			console.log(draftStatement);
 		}
@@ -365,7 +367,9 @@ function App() {
 				loadingElement.textContent = "loading";
 			}
 		}, 500);
-		const tweetID = extractTwitterStatusId(idInput.current!.value) as `${number}`;
+		const tweetID = extractTwitterStatusId(
+			idInput.current!.value
+		) as `${number}`;
 
 		console.log(tweetID);
 
@@ -537,8 +541,10 @@ function App() {
 								className="button-84 button-85 emoji-button"
 								onClick={updateNFT}
 							>
-								<strong>Update for <span ref={mintPriceRef}>[loading price...]</span>{" "}
-									MATIC</strong>
+								<strong>
+									Update for <span ref={mintPriceRef}>[loading price...]</span>{" "}
+									MATIC
+								</strong>
 							</button>
 							<div ref={loadingRef}></div>
 						</div>
